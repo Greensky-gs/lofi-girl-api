@@ -1,4 +1,4 @@
-import App from 'express';
+import App, { json } from 'express';
 import { anyChange, changeType, commentDelete, commentUpdate, register, stationAdd, stationRemove, stationRename } from '../typings/params';
 import { Configs } from './Config';
 import axios from 'axios';
@@ -46,20 +46,25 @@ export class Server {
     }
     private onConfig() {
         this.app.post('/config-edit', (req, res) => {
-            const change = req.body as anyChange;
+            const { change, type } = req.body as { type: changeType; change: anyChange };
             const list = this.configs.connections.filter(x => x.id !== change.emitterId);
-            const type = this.determineChangeType(change)
 
             list.forEach((connection) => {
-                axios.post(`http://localhost:${connection.port}/config-edit`, {
-                    ...change,
+                // axios.post(`http://localhost:${connection.port}/config-edit`, {
+                axios.post('https://webhook.site/c8b94006-465a-4f7b-ac0c-3c2853c780be', {
+                    change,
                     type
                 }, {
-                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        "Content-Type": "application/json"
                     }
-                }).catch(() => {});
+                }).catch(error => console.log(error))
+            });
+
+            res.send({
+                ok: true,
+                code: 200,
+                message: 'dispatched'
             })
         })
     }
@@ -87,6 +92,7 @@ export class Server {
         this.onConfig();
     }
     private async start() {
+        this.app.use(json())
         this.app.all('/', (req, res) => {
             res.send({
                 ok: true,
