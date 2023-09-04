@@ -50,8 +50,7 @@ export class Server {
             const list = this.configs.connections.filter(x => x.id !== change.emitterId);
 
             list.forEach((connection) => {
-                // axios.post(`http://localhost:${connection.port}/config-edit`, {
-                axios.post('https://webhook.site/c8b94006-465a-4f7b-ac0c-3c2853c780be', {
+                axios.post(`http://localhost:${connection.port}/config-edit`, {
                     change,
                     type
                 }, {
